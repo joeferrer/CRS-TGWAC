@@ -46,12 +46,28 @@ def ugc_parser(data):
 		
 	return ugclist 
 
-def tgwac_quick(ugclist):
+def tgwac(ugclist):
 	a = reduce(add,list(reduce(lambda x,y: x*y, el[0]) for el in ugclist))
 	b = reduce(add,list(reduce(lambda x,y: x, el[0]) for el in ugclist))
 	tgwa = a/b
 	return tgwa 
 
+def honor_eval(tgwa,underload):
+	print "\n\nTGWAC-Deeper-Analysis says your Total GWA is "  + str(tgwa)
+	if(underload==False):
+		if(tgwa<=1.75):
+			award = ""
+			if(tgwa<=1.2):
+				award = "Summa Cum Laude."
+			elif(tgwa<=1.45):
+				award = "Magna Cum Laude."
+			else:
+				award = "Cum laude."
+			print "Congratulations, if you don't have any disciplinary issues or the like, you are a candidate for " + award
+		else:
+			print "Your Total GWA is not (yet) for latin honors, but don't despair, you can still be do better and be great!"
+	else:		
+		print "You are not eligible for honors since you had an underloaded sem, but don't despair, the road to greatness does not stop there!"
 
 if __name__ == "__main__":
 	connector = modules.connector
@@ -64,18 +80,43 @@ if __name__ == "__main__":
 		print "\nLogin Successful..."
 		crawl_data = connector.site_crawl("https://crs.upd.edu.ph/viewgrades",site_opener)
 		ugc_list = ugc_parser(crawl_data.read())
-		tgwa = tgwac_quick(ugc_list)
+		tgwa = tgwac(ugc_list)
 		print "\nTGWAC Quick Analysis results say your Total GWA is " + str(tgwa)
-		user_input = get_Y_N("Do you want to proceed to the a more thorough evaluation?")
+		user_input = get_Y_N("Do you want to proceed to a more thorough evaluation?")
 		if(user_input.upper()=="Y"):
 			print "\nLoading subjects considered in TGWA computation..."
 			time.sleep(2)
 			for i in ugc_list:
 				print i
 				time.sleep(0.5)
-			#user_input = get_Y_N("From the subjects considered, are there any that are not supposed to be considered?")
-		else:
-			print "\nCRS-TGWAC Session Closed"
+			user_input = get_Y_N("From the subjects considered, are there any that shouldn't be counted?")
+			if(user_input.upper()=="Y"):
+				print "\nUsing the subjects listed above, type the subjects that must not be counted. (e.g. Math 17 THV)"
+				takeouts = list()
+				takingout = True
+				while(takingout):
+					takeouts.append(get_input())
+					user_input = get_Y_N("Is that all?")
+					if(user_input.upper()=="Y"):
+						takingout = False
+					else:
+						print "What other subject/s must be disregarded?"
+				for i in takeouts:
+					for j in ugc_list:
+						if i in j:
+							ugc_list.remove(j)
+				tgwa = tgwac(ugc_list)
+			user_input = get_Y_N("Have you ever had an underload sem?")
+			if(user_input.upper()=="Y"):
+				underload = True
+			else:
+				underload = False
+			print "\nAnalyzing gathered information..."
+			time.sleep(2)
+			honor_eval(tgwa,underload)
+
+		time.sleep(3)
+		print "\n\nCRS-TGWAC Session Closed"
 
 	else:
 		print "Login Failed. Re-run program"
