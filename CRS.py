@@ -1,8 +1,8 @@
-
+import time
 import getpass
 from operator import add
+from modules.user_end import get_input, get_Y_N
 import modules.connector
-from modules.user_end import get_input
 
 def ugc_parser(data):
 	raw_html = modules.connector.BeautifulSoup(data)
@@ -66,5 +66,16 @@ if __name__ == "__main__":
 		ugc_list = ugc_parser(crawl_data.read())
 		tgwa = tgwac_quick(ugc_list)
 		print "\nTGWAC Quick Analysis results say your Total GWA is " + str(tgwa)
+		user_input = get_Y_N("Do you want to proceed to the a more thorough evaluation?")
+		if(user_input.upper()=="Y"):
+			print "\nLoading subjects considered in TGWA computation..."
+			time.sleep(2)
+			for i in ugc_list:
+				print i
+				time.sleep(0.5)
+			#user_input = get_Y_N("From the subjects considered, are there any that are not supposed to be considered?")
+		else:
+			print "\nCRS-TGWAC Session Closed"
+
 	else:
 		print "Login Failed. Re-run program"
