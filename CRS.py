@@ -1,91 +1,8 @@
 import time
 import getpass
-from operator import add
-from modules.user_end import get_input, get_Y_N
 import modules.connector
-
-def ugc_parser(data):
-	raw_html = modules.connector.BeautifulSoup(data)
-	raw_td_iter = iter(raw_html.find_all('td'))
-	raw_td_list = raw_html.find_all('td')
-	subjt_index = -1
-	ugclist = list()
-	while True:
-		conv_temp = True
-		grade = 0
-		try:
-			temp = raw_td_iter.next().get_text()
-			subjt_index = subjt_index + 1	
-			units = float(temp)
-			temp = raw_td_iter.next().get_text()
-			subjt_index = subjt_index + 1	
-			if("INC" in temp or "DRP" in temp):
-				temp = temp.replace("\t","")
-				temp = temp.replace("\n","")
-				if(len(temp)==11):
-					temp = temp[6:10]
-				else:
-					conv_temp = False
-					if("INC" in temp):
-						grade = "INC"
-					else:
-						grade = "DRP"
-			if(conv_temp):		
-				grade = float(temp)
-			if((grade>=1 and grade<=5 and grade !=4) or (grade=="DRP" or grade=="INC")):
-				subject = raw_td_list[subjt_index-3].string
-				subject = subject.replace("\r","")
-				subject = subject.replace("\n","")
-				subject = subject.replace("\t","")
-				ugclist.append(((units,grade),subject))
-		except StopIteration:
-			break
-		except ValueError:
-			continue	
-
-	counter = len(ugclist)-1
-	while(counter>=0):
-		temp_units = 0
-		sem_units = ugclist[counter][0][0]
-		ugclist.pop(counter)
-		counter = counter-1
-		while(temp_units<sem_units):
-			temp_units = temp_units + ugclist[counter][0][0]
-			counter = counter-1
-			
-	k=0
-	while(k<len(ugclist)):
-		try:
-			if("INC" in  ugclist[k][0][1] or "DRP" in ugclist[k][0][1]):
-				ugclist.pop(k)	
-		except:
-			''' '''		
-		k = k+1	
-	
-	return ugclist 
-
-def tgwac(ugclist):
-	a = reduce(add,list(reduce(lambda x,y: x*y, el[0]) for el in ugclist))
-	b = reduce(add,list(reduce(lambda x,y: x, el[0]) for el in ugclist))
-	tgwa = a/b
-	return tgwa 
-
-def honor_eval(tgwa,underload):
-	print "\n\nTGWAC-Deeper-Analysis says your Total GWA is "  + str(tgwa)
-	if(underload==False):
-		if(tgwa<=1.75):
-			award = ""
-			if(tgwa<=1.2):
-				award = "Summa Cum Laude."
-			elif(tgwa<=1.45):
-				award = "Magna Cum Laude."
-			else:
-				award = "Cum laude."
-			print "Congratulations, if you don't have any disciplinary issues or the like, you are a candidate for " + award
-		else:
-			print "Your Total GWA is not (yet) for latin honors, but don't despair, you can still be do better and be great!"
-	else:		
-		print "You are not eligible for honors since you had an underloaded sem, but don't despair, the road to greatness does not stop there!"
+from modules.crs_fxns import ugc_parser,tgwac,honor_eval
+from modules.user_end import get_input, get_Y_N
 
 if __name__ == "__main__":
 	connector = modules.connector
@@ -97,7 +14,7 @@ if __name__ == "__main__":
 	if(site_opener != 0):
 		print "\nLogin Successful..."
 		crawl_data = connector.site_crawl("https://crs.upd.edu.ph/viewgrades",site_opener)
-		ugc_list = ugc_parser(crawl_data.read())
+		ugc_list = ugc_parser(connector.BeautifulSoup(crawl_data.read()))
 		tgwa = tgwac(ugc_list)
 		print "\nTGWAC Quick Analysis results say your Total GWA is " + str(tgwa)
 		user_input = get_Y_N("Do you want to proceed to a more thorough evaluation?")
