@@ -1,7 +1,7 @@
 import time
 import getpass
 import modules.connector
-from modules.crs_fxns import ugc_parser,tgwac,honor_eval
+from modules.crs_tgwac_fxns import ugc_parser,tgwac,honor_eval
 from modules.user_end import get_input, get_Y_N
 
 if __name__ == "__main__":
