@@ -23,10 +23,9 @@ def ugc_parser(data):
 		except StopIteration:
 			break
 		except ValueError:
-			if("4." in temp or "INC" in temp or "DRP" in temp):
+			if((("4.00" in temp) or "INC" in temp or "DRP" in temp or temp.isspace())and type(units) is float):
 				ugclist.append(((units,temp),subject))
 
-	
 	counter = len(ugclist)-1
 	while(counter>=0):
 		temp_units = 0
