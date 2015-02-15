@@ -47,3 +47,5 @@ In order to use CRS-TGWAC you must first __download the ZIP file__ of this repos
 <br>
 <br>
 When you're done dealing with the dependencies, just double click CRS.py or run it via your command prompt and all is well.
+
+<br/>
